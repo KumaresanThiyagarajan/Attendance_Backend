@@ -38,11 +38,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Attendance Salary Management API is running!' });
 });
 
-// Protected Routes (Authentication required)
-app.use('/api/employees', authMiddleware, employeeRoutes);
-app.use('/api/attendance', authMiddleware, attendanceRoutes);
-app.use('/api/advances', authMiddleware, advanceRoutes);
-app.use('/api/salary', authMiddleware, salaryRoutes);
+// Protected Routes (authentication handled per route)
+app.use('/api/employees', employeeRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/advances', advanceRoutes);
+app.use('/api/salary', salaryRoutes);
 
 // Start server
 app.listen(PORT, () => {

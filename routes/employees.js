@@ -1,11 +1,12 @@
 import express from 'express';
 import Employee from '../models/Employee.js';
-import isAdmin from '../middleware/isAdmin.js';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { requireAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-// Get all employees
-router.get('/', async (req, res) => {
+// Get all employees (authenticated users)
+router.get('/', authMiddleware, async (req, res) => {
     try {
         const employees = await Employee.find().sort({ createdAt: -1 });
         res.json(employees);
@@ -14,8 +15,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get single employee
-router.get('/:id', async (req, res) => {
+// Get single employee (authenticated users)
+router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const employee = await Employee.findById(req.params.id);
         if (!employee) {
@@ -28,7 +29,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new employee (Admin only)
-router.post('/', isAdmin, async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { employeeId, name, email, phone, hourlyRate, position } = req.body;
 
@@ -55,7 +56,7 @@ router.post('/', isAdmin, async (req, res) => {
 });
 
 // Update employee (Admin only)
-router.put('/:id', isAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { name, email, phone, hourlyRate, position, isActive } = req.body;
 
@@ -76,7 +77,7 @@ router.put('/:id', isAdmin, async (req, res) => {
 });
 
 // Delete employee (Admin only)
-router.delete('/:id', isAdmin, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         const employee = await Employee.findByIdAndDelete(req.params.id);
         if (!employee) {

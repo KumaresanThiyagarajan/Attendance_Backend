@@ -1,12 +1,13 @@
 import express from 'express';
 import Advance from '../models/Advance.js';
 import Employee from '../models/Employee.js';
-import isAdmin from '../middleware/isAdmin.js';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { requireAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-// Get all advances with optional filters
-router.get('/', async (req, res) => {
+// Get all advances with optional filters (authenticated users)
+router.get('/', authMiddleware, async (req, res) => {
     try {
         const { employeeId, status } = req.query;
         let query = {};
@@ -29,8 +30,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get advances for specific employee
-router.get('/employee/:employeeId', async (req, res) => {
+// Get advances for specific employee (authenticated users)
+router.get('/employee/:employeeId', authMiddleware, async (req, res) => {
     try {
         const { status } = req.query;
         let query = { employee: req.params.employeeId };
@@ -50,7 +51,7 @@ router.get('/employee/:employeeId', async (req, res) => {
 });
 
 // Create advance payment record (Admin only)
-router.post('/', isAdmin, async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { employee, amount, date, reason } = req.body;
 
@@ -78,7 +79,7 @@ router.post('/', isAdmin, async (req, res) => {
 });
 
 // Update advance status (Admin only)
-router.put('/:id', isAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { status, amount, date, reason } = req.body;
 
@@ -99,7 +100,7 @@ router.put('/:id', isAdmin, async (req, res) => {
 });
 
 // Delete advance record (Admin only)
-router.delete('/:id', isAdmin, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         const advance = await Advance.findByIdAndDelete(req.params.id);
         if (!advance) {

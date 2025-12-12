@@ -1,12 +1,13 @@
 import express from 'express';
 import Attendance from '../models/Attendance.js';
 import Employee from '../models/Employee.js';
-import isAdmin from '../middleware/isAdmin.js';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { requireAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-// Get all attendance records with optional filters
-router.get('/', async (req, res) => {
+// Get all attendance records with optional filters (authenticated users)
+router.get('/', authMiddleware, async (req, res) => {
     try {
         const { employeeId, startDate, endDate } = req.query;
         let query = {};
@@ -31,8 +32,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get attendance for specific employee
-router.get('/employee/:employeeId', async (req, res) => {
+// Get attendance for specific employee (authenticated users)
+router.get('/employee/:employeeId', authMiddleware, async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         let query = { employee: req.params.employeeId };
@@ -54,7 +55,7 @@ router.get('/employee/:employeeId', async (req, res) => {
 });
 
 // Create attendance record (Admin only)
-router.post('/', isAdmin, async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { employee, date, regularHours, overtimeHours, notes } = req.body;
 
@@ -83,7 +84,7 @@ router.post('/', isAdmin, async (req, res) => {
 });
 
 // Update attendance record (Admin only)
-router.put('/:id', isAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { date, regularHours, overtimeHours, notes } = req.body;
 
@@ -104,7 +105,7 @@ router.put('/:id', isAdmin, async (req, res) => {
 });
 
 // Delete attendance record (Admin only)
-router.delete('/:id', isAdmin, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         const attendance = await Attendance.findByIdAndDelete(req.params.id);
         if (!attendance) {

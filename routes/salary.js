@@ -3,11 +3,12 @@ import PDFDocument from 'pdfkit';
 import Employee from '../models/Employee.js';
 import Attendance from '../models/Attendance.js';
 import Advance from '../models/Advance.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Calculate salary for an employee
-router.get('/calculate/:employeeId', async (req, res) => {
+// Calculate salary for an employee (authenticated users)
+router.get('/calculate/:employeeId', authMiddleware, async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
 
@@ -98,8 +99,8 @@ router.get('/calculate/:employeeId', async (req, res) => {
     }
 });
 
-// Generate PDF salary report
-router.get('/report/:employeeId', async (req, res) => {
+// Generate PDF salary report (authenticated users)
+router.get('/report/:employeeId', authMiddleware, async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
 
