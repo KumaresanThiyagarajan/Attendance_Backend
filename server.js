@@ -6,6 +6,8 @@ import employeeRoutes from './routes/employees.js';
 import attendanceRoutes from './routes/attendance.js';
 import advanceRoutes from './routes/advances.js';
 import salaryRoutes from './routes/salary.js';
+import authRoutes from './routes/auth.js';
+import authMiddleware from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -28,18 +30,22 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => console.log('✅ MongoDB Atlas connected successfully to database: attendance'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Routes
-app.use('/api/employees', employeeRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/advances', advanceRoutes);
-app.use('/api/salary', salaryRoutes);
+// Public Routes (No authentication required)
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/', (req, res) => {
   res.json({ message: 'Attendance Salary Management API is running!' });
 });
 
+// Protected Routes (Authentication required)
+app.use('/api/employees', authMiddleware, employeeRoutes);
+app.use('/api/attendance', authMiddleware, attendanceRoutes);
+app.use('/api/advances', authMiddleware, advanceRoutes);
+app.use('/api/salary', authMiddleware, salaryRoutes);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🔐 JWT Authentication enabled`);
 });
