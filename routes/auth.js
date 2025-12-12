@@ -6,9 +6,9 @@ import authMiddleware from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // Generate JWT token
-const generateToken = (userId, username, role) => {
+const generateToken = (userId, email, role) => {
     return jwt.sign(
-        { id: userId, username, role },
+        { id: userId, email, role },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
@@ -19,32 +19,32 @@ const generateToken = (userId, username, role) => {
 // @access  Public
 router.post('/register', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         // Validation
-        if (!username || !password) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide username and password'
+                message: 'Please provide email and password'
             });
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Username already exists'
+                message: 'Email already exists'
             });
         }
 
-        // Check if this is the first user (make them admin)
-        const userCount = await User.countDocuments();
-        const role = userCount === 0 ? 'admin' : 'user';
+        // Check if this is the specific admin email
+        const isAdminEmail = email.toLowerCase() === 'kumaresanthiyagarajan11@gmail.com';
+        const role = isAdminEmail ? 'admin' : 'user';
 
         // Create new user
         const user = new User({
-            username,
+            email,
             password,
             role
         });
@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
         await user.save();
 
         // Generate token
-        const token = generateToken(user._id, user.username, user.role);
+        const token = generateToken(user._id, user.email, user.role);
 
         res.status(201).json({
             success: true,
@@ -60,7 +60,7 @@ router.post('/register', async (req, res) => {
             token,
             user: {
                 id: user._id,
-                username: user.username,
+                email: user.email,
                 role: user.role
             }
         });
@@ -79,18 +79,18 @@ router.post('/register', async (req, res) => {
 // @access  Public
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         // Validation
-        if (!username || !password) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide username and password'
+                message: 'Please provide email and password'
             });
         }
 
         // Find user
-        const user = await User.findOne({ username }).select('+password');
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -108,7 +108,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user._id, user.username, user.role);
+        const token = generateToken(user._id, user.email, user.role);
 
         res.status(200).json({
             success: true,
@@ -116,7 +116,7 @@ router.post('/login', async (req, res) => {
             token,
             user: {
                 id: user._id,
-                username: user.username,
+                email: user.email,
                 role: user.role
             }
         });
@@ -148,7 +148,7 @@ router.get('/me', authMiddleware, async (req, res) => {
             success: true,
             user: {
                 id: user._id,
-                username: user.username,
+                email: user.email,
                 role: user.role,
                 createdAt: user.createdAt
             }
