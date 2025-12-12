@@ -1,5 +1,6 @@
 import express from 'express';
 import Employee from '../models/Employee.js';
+import isAdmin from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
@@ -26,8 +27,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create new employee
-router.post('/', async (req, res) => {
+// Create new employee (Admin only)
+router.post('/', isAdmin, async (req, res) => {
     try {
         const { employeeId, name, email, phone, hourlyRate, position } = req.body;
 
@@ -53,8 +54,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Update employee
-router.put('/:id', async (req, res) => {
+// Update employee (Admin only)
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { name, email, phone, hourlyRate, position, isActive } = req.body;
 
@@ -74,8 +75,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Delete employee
-router.delete('/:id', async (req, res) => {
+// Delete employee (Admin only)
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
         const employee = await Employee.findByIdAndDelete(req.params.id);
         if (!employee) {

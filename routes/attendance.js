@@ -1,6 +1,7 @@
 import express from 'express';
 import Attendance from '../models/Attendance.js';
 import Employee from '../models/Employee.js';
+import isAdmin from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
@@ -52,8 +53,8 @@ router.get('/employee/:employeeId', async (req, res) => {
     }
 });
 
-// Create attendance record
-router.post('/', async (req, res) => {
+// Create attendance record (Admin only)
+router.post('/', isAdmin, async (req, res) => {
     try {
         const { employee, date, regularHours, overtimeHours, notes } = req.body;
 
@@ -81,8 +82,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Update attendance record
-router.put('/:id', async (req, res) => {
+// Update attendance record (Admin only)
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { date, regularHours, overtimeHours, notes } = req.body;
 
@@ -102,8 +103,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Delete attendance record
-router.delete('/:id', async (req, res) => {
+// Delete attendance record (Admin only)
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
         const attendance = await Attendance.findByIdAndDelete(req.params.id);
         if (!attendance) {

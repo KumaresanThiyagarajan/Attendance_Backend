@@ -1,6 +1,7 @@
 import express from 'express';
 import Advance from '../models/Advance.js';
 import Employee from '../models/Employee.js';
+import isAdmin from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
@@ -48,8 +49,8 @@ router.get('/employee/:employeeId', async (req, res) => {
     }
 });
 
-// Create advance payment record
-router.post('/', async (req, res) => {
+// Create advance payment record (Admin only)
+router.post('/', isAdmin, async (req, res) => {
     try {
         const { employee, amount, date, reason } = req.body;
 
@@ -76,8 +77,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Update advance status
-router.put('/:id', async (req, res) => {
+// Update advance status (Admin only)
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { status, amount, date, reason } = req.body;
 
@@ -97,8 +98,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Delete advance record
-router.delete('/:id', async (req, res) => {
+// Delete advance record (Admin only)
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
         const advance = await Advance.findByIdAndDelete(req.params.id);
         if (!advance) {
